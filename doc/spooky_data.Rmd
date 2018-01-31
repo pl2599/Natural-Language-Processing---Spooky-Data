@@ -9,7 +9,9 @@ output:
 
 # 1 Introduction
 
-This files contains some simple analysis of the SPOOKY data.  The goal is to remind ourselves of some of our basic tools for working with text data in `R` and also to practice reproducibility.  You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).  If you open to file from a forked `Week1-GitHub` repo, you should have no trouble running the code directly.
+This project's purpose is to use various techniques to study the similarities and the differences in writing among three horror story authors, Edgar Allan Poe, HP Lovecraft, and Mary Shelley. ____________
+
+Sections 2-4 exist to setup the data used for the analyses. Section 5 onwards contain the actual analyses, so feel free to skip to that section if you prefer.
 
 # 2 Preparation
 
@@ -18,7 +20,7 @@ This files contains some simple analysis of the SPOOKY data.  The goal is to rem
 First we want to install and load libraries we need along the way.
 
 ```{r, message = F, warning = F}
-packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges", "SnowballC")
+packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges", "SnowballC", "tidyr")
 
 # check packages that need to be installed.
 packages.needed <- setdiff(packages.used, intersect(installed.packages()[,1], packages.used))
@@ -35,6 +37,7 @@ library(wordcloud)
 library(stringr)
 library(ggridges)
 library(SnowballC)
+library(tidyr)
 ```
 
 ##2.2 Helper Function
@@ -84,7 +87,7 @@ spooky$author <- as.factor(spooky$author)
 
 ## 4 Data Manipulation
 
-## 4.1 Data Cleaning
+## 4.1 General Dataset
 
 The `unnest_tokens()` function drops all punctuation and transforms all words into lower case.  
 
@@ -152,6 +155,8 @@ Observations:
 3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
 # 6 Words Analyses
+
+This section is to study the most frequently used words 
 
 ## 6.1 Original Dataset Analysis
 
@@ -338,11 +343,115 @@ Observations
 
 1. 'Time' and 'found' is used more frequently by EAP and HPL.
 2. 'Ey' is used more frequently by EAP and MWS.
-3. 'Dai' is used frequently bya ll three authors.
+3. 'Dai' is used frequently by all three authors.
 
 ## 6.4 Accented Words
 
+### 6.4.i Frequency/Proportion of Words
+
+Another interesting analysis to make is to look at the frequency/proportion of accented words for each author. 
+
 ```{r}
+accented <- grep('à|á|â|ä|æ|ã|å|ā|è|é|ê|ë|ē|ė|ęî|ï|í|ī|į|ì|ô|ö|ò|ó|œ|ø|ō|õ|û|ü|ù|ú|ū', spooky_wrd$word)
+spooky_wrd_accented <- spooky_wrd[accented,]
+
+# Counts number of times each author used each word.
+author_words <- count(group_by(spooky_wrd_accented, word, author))
+
+# Counts number of times each word was used.
+all_words    <- rename(count(group_by(spooky_wrd_accented, word)), all = n)
+
+author_words <- left_join(author_words, all_words, by = "word")
+author_words <- arrange(author_words, desc(all))
+author_words <- ungroup(head(author_words, 60))
+
+# Counts the proportion of the word in the total number of words featured by each author
+author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+  
+ggplot(author_words) +
+  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  xlab(NULL) +
+  coord_flip() +
+  facet_wrap(~ author) +
+  theme(legend.position = "none")
+```
+
+Observations:
+
+We see that only EAP and HPL uses these accented words. However, there isn't many overlap of the specific words used between the two authors. As a result, it may be more useful to just simply see the proportion of accented words used by each author.
+
+```{r}
+EAP_accented <- sum(spooky_wrd_accented$author == "EAP")
+HPL_accented <- sum(spooky_wrd_accented$author == "HPL")
+MWS_accented <- sum(spooky_wrd_accented$author == "MWS")
+
+accented <- data.frame(Author = c("EAP", "HPL", "MWS"), Proportion_Accented = c(EAP_accented/frequency$EAP, HPL_accented/frequency$HPL, MWS_accented/frequency$MWS))
+
+ggplot(data = accented, aes(x = Author, y = Proportion_Accented, fill = Author)) +
+  geom_bar(stat="identity")
+```
+
+Observations:
+
+As we can see, EAP has more than double the proportion of accented words compared to that of HPL. MWS doesn't use accented words at all.
+
+
+##6.4.ii Word Clouds
+
+Just for fun, I created wordclouds for these accented words for these two authors.
+```{r}
+words_EAP <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$word
+freqs_EAP <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$n
+
+words_HPL <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$word
+freqs_HPL <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$n
+
+
+wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
+```
+
+## 4.2 Bigram Dataset
+
+We create another dataset using the `unnest_tokens()` function but this time to include two words at a time. 
+
+```{r}
+spooky_wrd_bigrams <- unnest_tokens(spooky, bigram, text, token = "ngrams", n = 2)
+spooky_wrd_bigrams <- separate(spooky_wrd_bigrams, bigram, c("word1", "word2"), sep = " ")
+spooky_wrd_bigrams <- spooky_wrd_bigrams %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+spooky_wrd_bigrams <- unite(spooky_wrd_bigrams, bigram, word1, word2, sep = " ")
+
+bigram_counts <- count(spooky_wrd_bigrams, author, bigram, sort = T)
+bigram_counts <- top_n(bigram_counts, 30, n)
+
+ggplot(bigram_counts) +
+  geom_col(aes(reorder(bigram, n), n, fill = author)) +
+  labs(x = NULL, y = "counts") +
+  theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))
+```
+
+
+###Tf_idf
+
+
+```{r}
+bigram_tf_idf <- spooky_wrd_bigrams %>%
+  count(author, bigram) %>%
+  bind_tf_idf(bigram, author, n) %>%
+  arrange(desc(tf_idf))
+
+bigram_tf_idf <- group_by(bigram_tf_idf, author)
+bigram_tf_idf <- ungroup(head(bigram_tf_idf, 30))
+
+ggplot(bigram_tf_idf) +
+  geom_col(aes(reorder(bigram, tf_idf), tf_idf, fill = author)) +
+  labs(x = NULL, y = "tf-idf") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip() +
+  labs(y = "TF-IDF values")
 
 ```
 
