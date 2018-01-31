@@ -1,21 +1,24 @@
 ---
 title: "Some Simple SPOOKY Data Analysis"
-author: "Cindy Rush"
+author: "Pak Kin (Chris) Lai"
 date: "January 22, 2018"
 output:
   pdf_document: default
   html_document: default
 ---
 
-# Introduction
+# 1 Introduction
 
 This files contains some simple analysis of the SPOOKY data.  The goal is to remind ourselves of some of our basic tools for working with text data in `R` and also to practice reproducibility.  You should be able to put this file in the `doc` folder of your `Project 1` repository and it should just run (provided you have `multiplot.R` in the `libs` folder and `spooky.csv` in the `data` folder).  If you open to file from a forked `Week1-GitHub` repo, you should have no trouble running the code directly.
 
-## Setup the libraries
-First we want to install and load libraries we need along the way.  Note that the following code is completely reproducible -- you don't need to add any code on your own to make it run.
+# 2 Preparation
+
+## 2.1 Library
+
+First we want to install and load libraries we need along the way.
 
 ```{r, message = F, warning = F}
-packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges")
+packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges", "SnowballC")
 
 # check packages that need to be installed.
 packages.needed <- setdiff(packages.used, intersect(installed.packages()[,1], packages.used))
@@ -31,72 +34,98 @@ library(tidytext)
 library(wordcloud)
 library(stringr)
 library(ggridges)
+library(SnowballC)
+```
 
+##2.2 Helper Function
+
+The only helper function that we use is the multiplot function. 
+
+```{r}
 source("../lib/multiplot.R")
 ```
 
-## Read in the data
-The following code assumes that the dataset `spooky.csv` lives in a `data` folder (and that we are inside a `docs` folder).
+## 2.3 Data
+
+The following code reads the the dataset `spooky.csv`. It assumes that it lives in a `data` folder (and that we are inside a `docs` folder).
 
 ```{r}
 spooky <- read.csv('../data/spooky.csv', as.is = TRUE)
 ```
 
-## An overview of the data structure and content
+# 3 Overview
 
-Let's first remind ourselves of the structure of the data.
+## 3.1 Structure 
+
+The structure of the data is as follows:
+
 ```{r}
 head(spooky)
 summary(spooky)
 ```
 
-We see from the above that each row of our data contains a unique ID, a single sentence text excerpt, and an abbreviated author name. `HPL` is Lovecraft, `MWS` is Shelly, and `EAP` is Poe.  Here are a few example sentences:
+Each row of our data contains a unique ID, a single sentence text excerpt, and an abbreviated author name. `HPL` is Lovecraft, `MWS` is Shelly, and `EAP` is Poe. 
 
-```{r}
-spooky$text[1]
-spooky$text[13494]
-spooky$text[666]
-```
+## 3.2 Missing Values
 
-We finally note that there are no missing values, and we change author name to be a factor variable, which will help us later on.
+There are no missing values.
 
 ```{r}
 sum(is.na(spooky))
+```
+
+##3.3 Reformatting Author
+
+Changing the author name to be a factor variable will help us later on.
+
+```{r}
 spooky$author <- as.factor(spooky$author)
 ```
 
+## 4 Data Manipulation
 
-## An intro to `tidytext`
+## 4.1 Data Cleaning
 
-For my tutorials on Project 1, I will be using `tidytext`.  If this is new to you, here's a textbook that can help: *[Text Mining with R; A Tidy Approach](https://www.tidytextmining.com)*.  It teaches the basic handling of natural language data in `R` using tools from the "tidyverse".  The tidy text format is a table with one token per row, where a token is a word.
-
-
-### Data Cleaning
-
-We first use the `unnest_tokens()` function to drop all punctuation and transform all words into lower case.  At least for now, the punctuation isn't really important to our analysis -- we want to study the words.  In addition, `tidytext` contains a dictionary of stop words, like "and" or "next", that we will get rid of for our analysis, the idea being that the non-common words (...maybe the SPOOKY words) that the authors use will be more interesting.
+The `unnest_tokens()` function drops all punctuation and transforms all words into lower case.  
 
 ```{r}
 spooky_wrd <- unnest_tokens(spooky, word, text)
 head(spooky_wrd)
+````
 
-head(stop_words)
-tail(stop_words)
+## 4.2 Stop Words
+
+Before filtering out the stop words, it may be useful to observe the most frequently used stop words for each author. We replicate a dataset so we can continue our analysis later. Then we filter out the stop words using tidytext's dictionary of stop words.
+
+```{r}
+spooky_wrd_stop <- spooky_wrd
 spooky_wrd <- anti_join(spooky_wrd, stop_words, by = "word")
 head(spooky_wrd)
 ````
 
-### Data Visualization
+## 4.3 Frequency of Author
 
-First we'll do some simple numerical summaries of the data to provide some nice visualizations.
+I created a dataset of the frequency of the words by each author for future analyses.
+
+```{r}
+EAP <- sum(spooky_wrd$author == "EAP")
+HPL <- sum(spooky_wrd$author == "HPL")
+MWS <- sum(spooky_wrd$author == "MWS")
+
+frequency <- data.frame(EAP, HPL, MWS, row.names = "Frequency of words")
+```
+
+# 5 Sentence and Structure Analyses
+
+## 5.1 Total Featured, Sentence Length, Word Length
 
 ```{r, message = FALSE}
 p1 <- ggplot(spooky) +
       geom_bar(aes(author, fill = author)) +
       theme(legend.position = "none")
 
-spooky$sen_length <- str_length(spooky$text)
-head(spooky$sen_length)
 
+spooky$sen_length <- str_length(spooky$text)
 
 p2 <- ggplot(spooky) +
       geom_density_ridges(aes(sen_length, author, fill = author)) +
@@ -104,34 +133,216 @@ p2 <- ggplot(spooky) +
       theme(legend.position = "none") +
       labs(x = "Sentence length [# characters]")
 
+
 spooky_wrd$word_length <- str_length(spooky_wrd$word)
-head(spooky_wrd$word_length)
 
 p3 <- ggplot(spooky_wrd) +
       geom_density(aes(word_length, fill = author), bw = 0.05, alpha = 0.3) +
       scale_x_log10() +
-      theme(legend.position = "none") +
       labs(x = "Word length [# characters]")
 
 layout <- matrix(c(1, 2, 1, 3), 2, 2, byrow = TRUE)
 multiplot(p1, p2, p3, layout = layout)
 ```
 
+Observations:
 
-From the above plots we find:
+1. EAP is featured most frequently.
+2. Sentence length varies more for EAP.
+3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
-*
+# 6 Words Analyses
 
-*
+## 6.1 Original Dataset Analysis
 
-*
+This is the analyis done on our original dataset with the lower case and without punctuation.
 
+### 6.1.i Frequency/Proportion of Words
 
-Now we study some of the most common words in the entire data set.  With the below code we plot the fifty most common words in the entire datset. We see that "time", "life", and "night" all appear frequently.
+We can repeat the same procedure to look at words that are not stop words.
 
 ```{r}
-words <- names(table(spooky_wrd$word))
-freqs <- table(spooky_wrd$word)
-head(sort(freqs, decreasing = TRUE))
-wordcloud(words, freqs, max.words = 50, color = c("purple4", "red4", "black"))
+# Counts number of times each author used each word.
+author_words <- count(group_by(spooky_wrd, word, author))
+
+# Counts number of times each word was used.
+all_words    <- rename(count(group_by(spooky_wrd, word)), all = n)
+
+author_words <- left_join(author_words, all_words, by = "word")
+author_words <- arrange(author_words, desc(all))
+author_words <- ungroup(head(author_words, 60))
+
+# Counts the proportion of the word in the total number of words featured by each author
+author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+  
+ggplot(author_words) +
+  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  xlab(NULL) +
+  coord_flip() +
+  facet_wrap(~ author) +
+  theme(legend.position = "none")
 ```
+
+Observations:
+
+1. 'Time' is used commonly by all three authors.
+2. 'Night' is used more frequently by HPL.
+3. 'Life', 'heart', 'eyes', 'day', 'death', and 'love' are used much more frequently by MWS. HPL seldom uses the word 'love'.
+4. 'Heard', 'house', annd 'door' are used more frequently by HPL.
+5. 'Head' is used frequently by EAP.
+
+## 6.1.ii Word Clouds
+
+```{r}
+words_EAP <- count(group_by(spooky_wrd[spooky_wrd$author == "EAP",], word))$word
+freqs_EAP <- count(group_by(spooky_wrd[spooky_wrd$author == "EAP",], word))$n
+
+words_HPL <- count(group_by(spooky_wrd[spooky_wrd$author == "HPL",], word))$word
+freqs_HPL <- count(group_by(spooky_wrd[spooky_wrd$author == "HPL",], word))$n
+
+words_MWS <- count(group_by(spooky_wrd[spooky_wrd$author == "MWS",], word))$word
+freqs_MWS <- count(group_by(spooky_wrd[spooky_wrd$author == "MWS",], word))$n
+
+
+wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_MWS, freqs_MWS, max.words = 30, color = c("yellow", "orange", "red"))
+
+```
+
+Observations:
+
+1. 'Time' and 'Found' are very common words among the three authors.
+2. EAP prefers the word 'Day', whereas HPL prefers the word 'Night'.
+3. 'Love', 'Heart', 'Life' are common words for MWS.
+
+### 6.2 Stop Words Dataset Analysis
+
+This is the analysis done on the stop dataset that we created earlier.
+
+### 6.2.i Frequency/Proportion of Words
+
+Using the dataset that includes the stop words, we can simply look at the most commonly used word grouped by each author since stop words are typically the most commonly used words. However, we look at the proportion instead of the total number of appearances since our earlier observation shows that authors are featured differently in this data. 
+
+```{r}
+# Counts number of times each author used each word.
+author_words <- count(group_by(spooky_wrd_stop, word, author))
+
+# Counts number of times each word was used.
+all_words    <- rename(count(group_by(spooky_wrd_stop, word)), all = n)
+
+author_words <- left_join(author_words, all_words, by = "word")
+author_words <- arrange(author_words, desc(all))
+author_words <- ungroup(head(author_words, 60))
+
+# Counts the proportion of the word in the total number of words featured by each author
+author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+  
+ggplot(author_words) +
+  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  xlab(NULL) +
+  coord_flip() +
+  facet_wrap(~ author) +
+  theme(legend.position = "none")
+```
+
+Observations:
+
+1. EAP uses the words 'the', 'of', 'a', 'in'  much more frequently than the other two authors, and "and' much less frequently than the others.
+2. EAP uses the word 'of' much more frequently than he uses 'and', whereas for the other two authors, the frequency of these two words are around the same.
+3. HPL uses 'had' more frequently than the other two authors, but only by a small margin.
+4. MWP uses the words "I", 'my', 'his' more frequently than the other two authors, but only by a small margin. 
+5. HPL uses 'my' less frequently than the other two authors, but only by a small margin.
+
+### 6.2.ii Word Clouds
+
+```{r}
+words_EAP <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "EAP",], word))$word
+freqs_EAP <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "EAP",], word))$n
+
+words_HPL <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "HPL",], word))$word
+freqs_HPL <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "HPL",], word))$n
+
+words_MWS <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "MWS",], word))$word
+freqs_MWS <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "MWS",], word))$n
+
+
+wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_MWS, freqs_MWS, max.words = 30, color = c("yellow", "orange", "red"))
+```
+
+Observations:
+
+1. 'The', 'of', and 'and' are frequently used among the three authors.
+2. 'I' is more commonly used by MWS.
+
+## 6.3 Stem Words Dataset Analysis
+
+It might be interesting to see the words grouped by their stem instead. To do this, I duplicated the dataset and did the same analyses as above. 
+
+### 6.3.i Frequency/Proportion of Words
+
+```{r}
+spooky_wrd_stem <- spooky_wrd
+spooky_wrd_stem$word <- wordStem(spooky_wrd_stem$word)
+
+# Counts number of times each author used each word.
+author_words <- count(group_by(spooky_wrd_stem, word, author))
+
+# Counts number of times each word was used.
+all_words    <- rename(count(group_by(spooky_wrd_stem, word)), all = n)
+
+author_words <- left_join(author_words, all_words, by = "word")
+author_words <- arrange(author_words, desc(all))
+author_words <- ungroup(head(author_words, 60))
+
+# Counts the proportion of the word in the total number of words featured by each author
+author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+  
+ggplot(author_words) +
+  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  xlab(NULL) +
+  coord_flip() +
+  facet_wrap(~ author) +
+  theme(legend.position = "none")
+```
+
+Observations:
+
+1. 'Dai', 'ey', 'heart', 'feel', and 'death' are used more frequently by MWS.
+2. 'Love' is used significantly more frequently by MWS.
+3. 'Natur', 'word', and 'appear' is used by EAP more frequently.
+4. 'Night' and 'hous' is used much more frequently by HPL.
+5. 'Fear' is used less frequently compared to the other authors.
+
+### 6.3.ii Word Clouds
+
+```{r}
+words_EAP <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$word
+freqs_EAP <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$n
+
+words_HPL <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$word
+freqs_HPL <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$n
+
+words_MWS <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$word
+freqs_MWS <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$n
+
+
+wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_MWS, freqs_MWS, max.words = 30, color = c("yellow", "orange", "red"))
+```
+
+Observations
+
+1. 'Time' and 'found' is used more frequently by EAP and HPL.
+2. 'Ey' is used more frequently by EAP and MWS.
+3. 'Dai' is used frequently bya ll three authors.
+
+## 6.4 Accented Words
+
+```{r}
+
+```
+
