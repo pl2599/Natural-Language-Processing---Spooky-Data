@@ -154,7 +154,7 @@ Observations:
 2. Sentence length varies more for EAP.
 3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
-# 6 Words Analyses
+# 6 Word Frequency
 
 This section is to study the most frequently used words 
 
@@ -221,6 +221,7 @@ Observations:
 2. EAP prefers the word 'Day', whereas HPL prefers the word 'Night'.
 3. 'Love', 'Heart', 'Life' are common words for MWS.
 
+
 ### 6.2 Stop Words Dataset Analysis
 
 This is the analysis done on the stop dataset that we created earlier.
@@ -231,19 +232,19 @@ Using the dataset that includes the stop words, we can simply look at the most c
 
 ```{r}
 # Counts number of times each author used each word.
-author_words <- count(group_by(spooky_wrd_stop, word, author))
+author_words_stop <- count(group_by(spooky_wrd_stop, word, author))
 
 # Counts number of times each word was used.
-all_words    <- rename(count(group_by(spooky_wrd_stop, word)), all = n)
+all_words_stop    <- rename(count(group_by(spooky_wrd_stop, word)), all = n)
 
-author_words <- left_join(author_words, all_words, by = "word")
-author_words <- arrange(author_words, desc(all))
-author_words <- ungroup(head(author_words, 60))
+author_words_stop <- left_join(author_words_stop, all_words_stop, by = "word")
+author_words_stop <- arrange(author_words_stop, desc(all))
+author_words_stop <- ungroup(head(author_words_stop, 60))
 
 # Counts the proportion of the word in the total number of words featured by each author
-author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+author_words_stop$proportion <- ifelse(author_words_stop$author == "EAP", author_words_stop$n/frequency$EAP, ifelse(author_words_stop$author == "HPL", author_words_stop$n/frequency$HPL, author_words_stop$n/frequency$MWS))
   
-ggplot(author_words) +
+ggplot(author_words_stop) +
   geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
   xlab(NULL) +
   coord_flip() +
@@ -259,29 +260,6 @@ Observations:
 4. MWP uses the words "I", 'my', 'his' more frequently than the other two authors, but only by a small margin. 
 5. HPL uses 'my' less frequently than the other two authors, but only by a small margin.
 
-### 6.2.ii Word Clouds
-
-```{r}
-words_EAP <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "EAP",], word))$word
-freqs_EAP <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "EAP",], word))$n
-
-words_HPL <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "HPL",], word))$word
-freqs_HPL <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "HPL",], word))$n
-
-words_MWS <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "MWS",], word))$word
-freqs_MWS <- count(group_by(spooky_wrd_stop[spooky_wrd_stop$author == "MWS",], word))$n
-
-
-wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
-wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
-wordcloud(words_MWS, freqs_MWS, max.words = 30, color = c("yellow", "orange", "red"))
-```
-
-Observations:
-
-1. 'The', 'of', and 'and' are frequently used among the three authors.
-2. 'I' is more commonly used by MWS.
-
 ## 6.3 Stem Words Dataset Analysis
 
 It might be interesting to see the words grouped by their stem instead. To do this, I duplicated the dataset and did the same analyses as above. 
@@ -293,19 +271,19 @@ spooky_wrd_stem <- spooky_wrd
 spooky_wrd_stem$word <- wordStem(spooky_wrd_stem$word)
 
 # Counts number of times each author used each word.
-author_words <- count(group_by(spooky_wrd_stem, word, author))
+author_words_stem <- count(group_by(spooky_wrd_stem, word, author))
 
 # Counts number of times each word was used.
-all_words    <- rename(count(group_by(spooky_wrd_stem, word)), all = n)
+all_words_stem    <- rename(count(group_by(spooky_wrd_stem, word)), all = n)
 
-author_words <- left_join(author_words, all_words, by = "word")
-author_words <- arrange(author_words, desc(all))
-author_words <- ungroup(head(author_words, 60))
+author_words_stem <- left_join(author_words_stem, all_words_stem, by = "word")
+author_words_stem <- arrange(author_words_stem, desc(all))
+author_words_stem <- ungroup(head(author_words_stem, 60))
 
 # Counts the proportion of the word in the total number of words featured by each author
-author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+author_words_stem$proportion <- ifelse(author_words_stem$author == "EAP", author_words_stem$n/frequency$EAP, ifelse(author_words_stem$author == "HPL", author_words_stem$n/frequency$HPL, author_words_stem$n/frequency$MWS))
   
-ggplot(author_words) +
+ggplot(author_words_stem) +
   geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
   xlab(NULL) +
   coord_flip() +
@@ -324,19 +302,19 @@ Observations:
 ### 6.3.ii Word Clouds
 
 ```{r}
-words_EAP <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$word
-freqs_EAP <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$n
+words_EAP_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$word
+freqs_EAP_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "EAP",], word))$n
 
-words_HPL <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$word
-freqs_HPL <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$n
+words_HPL_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$word
+freqs_HPL_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "HPL",], word))$n
 
-words_MWS <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$word
-freqs_MWS <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$n
+words_MWS_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$word
+freqs_MWS_stem <- count(group_by(spooky_wrd_stem[spooky_wrd_stem$author == "MWS",], word))$n
 
 
-wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
-wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
-wordcloud(words_MWS, freqs_MWS, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_EAP_stem, freqs_EAP_stem, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL_stem, freqs_HPL_stem, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_MWS_stem, freqs_MWS_stem, max.words = 30, color = c("yellow", "orange", "red"))
 ```
 
 Observations
@@ -345,7 +323,7 @@ Observations
 2. 'Ey' is used more frequently by EAP and MWS.
 3. 'Dai' is used frequently by all three authors.
 
-## 6.4 Accented Words
+## 6.4 Accented Words Dataset
 
 ### 6.4.i Frequency/Proportion of Words
 
@@ -356,19 +334,19 @@ accented <- grep('à|á|â|ä|æ|ã|å|ā|è|é|ê|ë|ē|ė|ęî|ï|í|ī|į|ì|
 spooky_wrd_accented <- spooky_wrd[accented,]
 
 # Counts number of times each author used each word.
-author_words <- count(group_by(spooky_wrd_accented, word, author))
+author_words_accented <- count(group_by(spooky_wrd_accented, word, author))
 
 # Counts number of times each word was used.
-all_words    <- rename(count(group_by(spooky_wrd_accented, word)), all = n)
+all_words_accented    <- rename(count(group_by(spooky_wrd_accented, word)), all = n)
 
-author_words <- left_join(author_words, all_words, by = "word")
-author_words <- arrange(author_words, desc(all))
-author_words <- ungroup(head(author_words, 60))
+author_words_accented <- left_join(author_words_accented, all_words_accented, by = "word")
+author_words_accented <- arrange(author_words_accented, desc(all))
+author_words_accented <- ungroup(head(author_words_accented, 60))
 
 # Counts the proportion of the word in the total number of words featured by each author
-author_words$proportion <- ifelse(author_words$author == "EAP", author_words$n/frequency$EAP, ifelse(author_words$author == "HPL", author_words$n/frequency$HPL, author_words$n/frequency$MWS))
+author_words_accented$proportion <- ifelse(author_words_accented$author == "EAP", author_words_accented$n/frequency$EAP, ifelse(author_words_accented$author == "HPL", author_words_accented$n/frequency$HPL, author_words_accented$n/frequency$MWS))
   
-ggplot(author_words) +
+ggplot(author_words_accented) +
   geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
   xlab(NULL) +
   coord_flip() +
@@ -395,25 +373,33 @@ Observations:
 
 As we can see, EAP has more than double the proportion of accented words compared to that of HPL. MWS doesn't use accented words at all.
 
-
 ##6.4.ii Word Clouds
 
 Just for fun, I created wordclouds for these accented words for these two authors.
+
 ```{r}
-words_EAP <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$word
-freqs_EAP <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$n
+words_EAP_accented <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$word
+freqs_EAP_accented <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "EAP",], word))$n
 
-words_HPL <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$word
-freqs_HPL <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$n
+words_HPL_accented <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$word
+freqs_HPL_accented <- count(group_by(spooky_wrd_accented[spooky_wrd_accented$author == "HPL",], word))$n
 
 
-wordcloud(words_EAP, freqs_EAP, max.words = 30, color = c("yellow", "orange", "red"))
-wordcloud(words_HPL, freqs_HPL, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_EAP_accented, freqs_EAP_accented, max.words = 30, color = c("yellow", "orange", "red"))
+wordcloud(words_HPL_accented, freqs_HPL_accented, max.words = 30, color = c("yellow", "orange", "red"))
 ```
 
-## 4.2 Bigram Dataset
+Observations:
+
+There isn't much overlap of common accented words between the two authors.
+
+## 6.5 Bigram Dataset
+
+### 6.5.i Frequency of Bigrams
 
 We create another dataset using the `unnest_tokens()` function but this time to include two words at a time. 
+
+We create an increasing ordered bar graph to show the most frequently used bigrams, colored by the author. 
 
 ```{r}
 spooky_wrd_bigrams <- unnest_tokens(spooky, bigram, text, token = "ngrams", n = 2)
@@ -432,9 +418,15 @@ ggplot(bigram_counts) +
   theme(legend.position = "top", axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9))
 ```
 
+Observations:
 
-###Tf_idf
+MWS' 'Lord Raymond' is the most commonly used bigram among all three authors. 'Ha ha' is used most commonly by EAP. 'Heh heh' is used most frequently by HPL.
 
+Among the top 30 bigrams, EAP holds the majority of them, whereas MWS holds the least.
+
+### 6.5.ii Tf_idf 
+
+Just for fault-proof, a Tf_idf analysis is also done to look at the rarest bigrams for each author.
 
 ```{r}
 bigram_tf_idf <- spooky_wrd_bigrams %>%
@@ -454,4 +446,3 @@ ggplot(bigram_tf_idf) +
   labs(y = "TF-IDF values")
 
 ```
-
