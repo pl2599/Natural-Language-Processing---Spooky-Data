@@ -71,7 +71,7 @@ Each row of our data contains a unique ID, a single sentence text excerpt, and a
 
 ## 3.2 Missing Values
 
-There are no missing values.
+We also see that there are no missing values.
 
 ```{r}
 sum(is.na(spooky))
@@ -86,6 +86,8 @@ spooky$author <- as.factor(spooky$author)
 ```
 
 ## 4 Data Manipulation
+
+Now we want to manipulate the data so our analysis could be done easier.
 
 ## 4.1 General Dataset
 
@@ -222,6 +224,36 @@ Observations:
 3. 'Love', 'Heart', 'Life' are common words for MWS.
 
 
+### 6.1.i Tf-idf
+  
+A Tf-idf analysis will give us a measure of the frequency of a word used by one author relative to the frequency of that word used by the others. In other words, it adjusts for the rarity of the word. 
+
+```{r}
+tf_idf <- spooky_wrd %>%
+  count(author, word) %>%
+  bind_tf_idf(word, author, n) %>%
+  arrange(desc(tf_idf))
+
+tf_idf <- group_by(tf_idf, author)
+tf_idf <- ungroup(head(tf_idf, 30))
+
+ggplot(tf_idf) +
+  geom_col(aes(reorder(word, tf_idf), tf_idf, fill = author)) +
+  labs(x = NULL, y = "tf-idf") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip() +
+  labs(y = "TF-IDF values")
+
+```
+
+Observations:
+
+1. As we expect, names such as 'Dupin', 'Gilman', 'Perdita' are the words with the highest tf-idf.
+2. EAP's 'Monsieur' has a high tf-idf. However, she has the least amount of words in the top 30 tf-idfs shown above.
+3. HPL's 'folk', 'bearded', 'reef', 'brown', and 'attic' are interesting words with high tf-idf.
+4. MWS's 'misery', 'feelings', labours', and 'protector' are words with high tf-idf. They are words most associated with emotions and protections. MWS also has the most amount of words in the top 30 tf-idfs. 
+
 ### 6.2 Stop Words Dataset Analysis
 
 This is the analysis done on the stop dataset that we created earlier.
@@ -356,7 +388,7 @@ ggplot(author_words_accented) +
 
 Observations:
 
-We see that only EAP and HPL uses these accented words. However, there isn't many overlap of the specific words used between the two authors. As a result, it may be more useful to just simply see the proportion of accented words used by each author.
+1. We see that only EAP and HPL uses these accented words. However, there isn't many overlap of the specific words used between the two authors. As a result, it may be more useful to just simply see the proportion of accented words used by each author.
 
 ```{r}
 EAP_accented <- sum(spooky_wrd_accented$author == "EAP")
@@ -371,7 +403,8 @@ ggplot(data = accented, aes(x = Author, y = Proportion_Accented, fill = Author))
 
 Observations:
 
-As we can see, EAP has more than double the proportion of accented words compared to that of HPL. MWS doesn't use accented words at all.
+1. As we can see, EAP has more than double the proportion of accented words compared to that of HPL. 
+2. MWS doesn't use accented words at all.
 
 ##6.4.ii Word Clouds
 
@@ -391,7 +424,7 @@ wordcloud(words_HPL_accented, freqs_HPL_accented, max.words = 30, color = c("yel
 
 Observations:
 
-There isn't much overlap of common accented words between the two authors.
+1. There isn't much overlap of common accented words between the two authors.
 
 ## 6.5 Bigram Dataset
 
@@ -420,13 +453,13 @@ ggplot(bigram_counts) +
 
 Observations:
 
-MWS' 'Lord Raymond' is the most commonly used bigram among all three authors. 'Ha ha' is used most commonly by EAP. 'Heh heh' is used most frequently by HPL.
+1. MWS' 'Lord Raymond' is the most commonly used bigram among all three authors. 'Ha ha' is used most commonly by EAP. 'Heh heh' is used most frequently by HPL.
 
-Among the top 30 bigrams, EAP holds the majority of them, whereas MWS holds the least.
+2. Among the top 30 bigrams, EAP holds the majority of them, whereas MWS holds the least.
 
 ### 6.5.ii Tf_idf 
 
-Just for fault-proof, a Tf_idf analysis is also done to look at the rarest bigrams for each author.
+Just for fault-proof, a Tf_idf analysis is also done to look at the top 30 rarest bigrams among the three authors.
 
 ```{r}
 bigram_tf_idf <- spooky_wrd_bigrams %>%
@@ -446,3 +479,5 @@ ggplot(bigram_tf_idf) +
   labs(y = "TF-IDF values")
 
 ```
+
+#7 Sentiment Analysis
