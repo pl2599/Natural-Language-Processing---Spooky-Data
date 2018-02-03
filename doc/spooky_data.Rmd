@@ -20,7 +20,7 @@ Sections 2-4 exist to setup the data used for the analyses. Section 5 onwards co
 First we want to install and load libraries we need along the way.
 
 ```{r, message = F, warning = F}
-packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges", "SnowballC", "tidyr")
+packages.used <- c("ggplot2", "dplyr", "tidytext", "wordcloud", "stringr", "ggridges", "SnowballC", "tidyr", "widyr")
 
 # check packages that need to be installed.
 packages.needed <- setdiff(packages.used, intersect(installed.packages()[,1], packages.used))
@@ -38,6 +38,7 @@ library(stringr)
 library(ggridges)
 library(SnowballC)
 library(tidyr)
+library(widyr)
 ```
 
 ##2.2 Helper Function
@@ -234,8 +235,9 @@ tf_idf <- spooky_wrd %>%
   bind_tf_idf(word, author, n) %>%
   arrange(desc(tf_idf))
 
-tf_idf <- group_by(tf_idf, author)
-tf_idf <- ungroup(head(tf_idf, 30))
+#tf_idf <- group_by(tf_idf, author)
+#tf_idf <- ungroup(head(tf_idf, 30))
+tf_idf <- head(tf_idf, 30)
 
 ggplot(tf_idf) +
   geom_col(aes(reorder(word, tf_idf), tf_idf, fill = author)) +
@@ -481,3 +483,48 @@ ggplot(bigram_tf_idf) +
 ```
 
 #7 Sentiment Analysis
+
+
+#7 Word Pairs
+
+Now we want to analyze any pair of words that might show up in each text. This is separate from our bigram analysis because the pairs are irrespective of their adjacency, as long as they exist in the same text/passage.
+
+```{r}
+EAP_pairs <- pairwise_count(filter(spooky_wrd, author == "EAP"), word, id, sort = TRUE)
+EAP_pairs$author <- "EAP"
+HPL_pairs <- pairwise_count(filter(spooky_wrd, author == "HPL"), word, id, sort = TRUE)
+HPL_pairs$author <- "HPL"
+MWS_pairs <- pairwise_count(filter(spooky_wrd, author == "MWS"), word, id, sort = TRUE)
+MWS_pairs$author <- "MWS"
+
+#ddply is used to count pairwise for each author group
+pairs <- ddply(spooky_wrd, .(author), pairwise_count, word, id, sort = TRUE)
+pairs <- group_by(pairs, author)
+
+#Filtered top 30 for faster computation
+pairs <- top_n(pairs, 30, n)
+
+#Remove duplicates
+sorted_pairs <- t(apply(pairs[,2:3], 1, sort))
+pairs$item1 <- sorted_pairs[, 1]
+pairs$item2 <- sorted_pairs[, 2]
+pairs <- pairs[!duplicated(pairs),]
+
+#United Pairs into one column
+pairs <- unite(pairs, pairs, item1, item2, sep = " ")
+
+ggplot(pairs) +
+  geom_col(aes(reorder(pairs, n), n, fill = author)) +
+  labs(x = NULL, y = "Frequency") +
+  theme(legend.position = "none") +
+  facet_wrap(~ author, ncol = 3, scales = "free") +
+  coord_flip() +
+  labs(y = "Frequency")
+```
+
+Observations:
+
+1. EAP's most common pair is 'lalande madame'. Interestingly, 'Chess player' is also a pretty common pair.
+2. HPL's most common pair is 'space time', also followed by 'day night'. A lot of the pairs also include words such as 'house', 'door', street'. 
+3. MWS' most common pair is 'eyes tear'. A lot of her pairs include words such as 'love' and 'eyes'. 
+4. All three authors have 'day night' in their top pairs. EAP and HPL as their 2nd highest, and MWS as ranked 6th. However it is important to note that the frequency of MWS' pairs are higher than the other two authors. Therefore, she actually uses 'day night' the most. 
