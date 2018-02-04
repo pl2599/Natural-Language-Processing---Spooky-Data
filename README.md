@@ -131,8 +131,13 @@ Another interesting analysis to make is to look at the frequency/proportion of a
 Observations:
 
 1. We see that only EAP and HPL uses these accented words. 
+<<<<<<< HEAD
 2. EAP uses the word 'rogeêt' a lot. 
 3. HPL uses the word 'celephaiïs a lot. 
+=======
+2. EAP uses the word 'rogeÃªt' a lot. 
+3. HPL uses the word 'celephaiÃ¯s a lot. 
+>>>>>>> d4940e1393d73098306a2ce9f0de2dd4ebe45f3a
 
 ### 6.4.ii Proportion of All Words
 
