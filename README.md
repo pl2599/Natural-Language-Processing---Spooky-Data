@@ -26,3 +26,18 @@ proj/
 Please see each subfolder for a README file.
 
 ![alt text](figs/Overall_structure.png)
+![alt text](figs/Original_proportion.png)
+![alt text](figs/EAP_Original_Wordcloud.png)
+![alt text](figs/HPL_Original_Wordcloud.png)
+![alt text](figs/MWS_Original_Wordcloud.png)
+![alt text](figs/Original_tf_idf.png)
+![alt text](figs/Stop_proportion.png)
+![alt text](figs/Stem_proportion.png)
+![alt text](figs/Accented_proportion.png)
+![alt text](figs/Accented_proportion_all.png)
+![alt text](figs/Bigram_frequency.png)
+![alt text](figs/Bigram_tf_idf.png)
+![alt text](figs/Pairs_frequency.png)
+![alt text](figs/Sentiment.png)
+![alt text](figs/Fear.png)
+
