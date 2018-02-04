@@ -157,11 +157,11 @@ Observations:
 2. Sentence length varies more for EAP.
 3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
-# 6 Word Frequency
+# 6 Word Analyses
 
 This section is to study the most frequently used words 
 
-## 6.1 Original Dataset Analysis
+## 6.1 Original Dataset
 
 This is the analyis done on our original dataset with the lower case and without punctuation.
 
@@ -235,8 +235,6 @@ tf_idf <- spooky_wrd %>%
   bind_tf_idf(word, author, n) %>%
   arrange(desc(tf_idf))
 
-#tf_idf <- group_by(tf_idf, author)
-#tf_idf <- ungroup(head(tf_idf, 30))
 tf_idf <- head(tf_idf, 30)
 
 ggplot(tf_idf) +
@@ -256,7 +254,7 @@ Observations:
 3. HPL's 'folk', 'bearded', 'reef', 'brown', and 'attic' are interesting words with high tf-idf.
 4. MWS's 'misery', 'feelings', labours', and 'protector' are words with high tf-idf. They are words most associated with emotions and protections. MWS also has the most amount of words in the top 30 tf-idfs. 
 
-### 6.2 Stop Words Dataset Analysis
+### 6.2 Stop Words Dataset
 
 This is the analysis done on the stop dataset that we created earlier.
 
@@ -294,7 +292,7 @@ Observations:
 4. MWP uses the words "I", 'my', 'his' more frequently than the other two authors, but only by a small margin. 
 5. HPL uses 'my' less frequently than the other two authors, but only by a small margin.
 
-## 6.3 Stem Words Dataset Analysis
+## 6.3 Stem Words Dataset
 
 It might be interesting to see the words grouped by their stem instead. To do this, I duplicated the dataset and did the same analyses as above. 
 
@@ -369,28 +367,32 @@ spooky_wrd_accented <- spooky_wrd[accented,]
 
 # Counts number of times each author used each word.
 author_words_accented <- count(group_by(spooky_wrd_accented, word, author))
+author_words_accented <- arrange(author_words_accented, desc(n))
 
-# Counts number of times each word was used.
-all_words_accented    <- rename(count(group_by(spooky_wrd_accented, word)), all = n)
-
-author_words_accented <- left_join(author_words_accented, all_words_accented, by = "word")
-author_words_accented <- arrange(author_words_accented, desc(all))
-author_words_accented <- ungroup(head(author_words_accented, 60))
+# Gets the top 30
+author_words_accented <- group_by(author_words_accented, author)
+author_words_accented <- top_n(author_words_accented, 30, word)
 
 # Counts the proportion of the word in the total number of words featured by each author
 author_words_accented$proportion <- ifelse(author_words_accented$author == "EAP", author_words_accented$n/frequency$EAP, ifelse(author_words_accented$author == "HPL", author_words_accented$n/frequency$HPL, author_words_accented$n/frequency$MWS))
   
 ggplot(author_words_accented) +
-  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
-  xlab(NULL) +
+  #geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  geom_col(aes(reorder(word, proportion), proportion, fill = author)) +
+  labs(x = NULL, y = "Proportion") +
   coord_flip() +
-  facet_wrap(~ author) +
+  facet_wrap(~ author, ncol = 2, scales = "free") +
   theme(legend.position = "none")
+
 ```
 
 Observations:
 
-1. We see that only EAP and HPL uses these accented words. However, there isn't many overlap of the specific words used between the two authors. As a result, it may be more useful to just simply see the proportion of accented words used by each author.
+1. We see that only EAP and HPL uses these accented words. 
+2. EAP uses the word 'rogeêt' a lot. 
+3. HPL uses the word 'celephaiïs a lot. 
+
+However, there isn't many overlap of the specific words used between the two authors. As a result, it may be more useful to just simply see the proportion of accented words used by each author.
 
 ```{r}
 EAP_accented <- sum(spooky_wrd_accented$author == "EAP")
@@ -469,8 +471,7 @@ bigram_tf_idf <- spooky_wrd_bigrams %>%
   bind_tf_idf(bigram, author, n) %>%
   arrange(desc(tf_idf))
 
-bigram_tf_idf <- group_by(bigram_tf_idf, author)
-bigram_tf_idf <- ungroup(head(bigram_tf_idf, 30))
+bigram_tf_idf <- head(bigram_tf_idf, 30))
 
 ggplot(bigram_tf_idf) +
   geom_col(aes(reorder(bigram, tf_idf), tf_idf, fill = author)) +
@@ -482,12 +483,11 @@ ggplot(bigram_tf_idf) +
 
 ```
 
-#7 Sentiment Analysis
-
-
-#7 Word Pairs
+## 6.6 Word Pairs Dataset
 
 Now we want to analyze any pair of words that might show up in each text. This is separate from our bigram analysis because the pairs are irrespective of their adjacency, as long as they exist in the same text/passage.
+
+## 6.6.i Frequency of Word Pairs
 
 ```{r}
 EAP_pairs <- pairwise_count(filter(spooky_wrd, author == "EAP"), word, id, sort = TRUE)
@@ -528,3 +528,73 @@ Observations:
 2. HPL's most common pair is 'space time', also followed by 'day night'. A lot of the pairs also include words such as 'house', 'door', street'. 
 3. MWS' most common pair is 'eyes tear'. A lot of her pairs include words such as 'love' and 'eyes'. 
 4. All three authors have 'day night' in their top pairs. EAP and HPL as their 2nd highest, and MWS as ranked 6th. However it is important to note that the frequency of MWS' pairs are higher than the other two authors. Therefore, she actually uses 'day night' the most. 
+
+# 7 Sentiment Analysis
+
+Last but not least, we may want to look at some sentiment analysis to see what kind of emotions are the authors trying to evoke out of the readers.
+
+## 7.1 Sentiment Words across Authors
+
+```{r}
+# Keep words that have been classified within the NRC lexicon.
+get_sentiments('nrc')
+sentiments <- inner_join(spooky_wrd, get_sentiments('nrc'), by = "word")
+
+# Count how many times each sentiment occurs
+sentiments_count <- count(group_by(sentiments, sentiment, author))
+
+# Convert to proportion because each author are featured at different amounts
+sentiments_count$proportion <- ifelse(sentiments_count$author == "EAP", sentiments_count$n/frequency$EAP, ifelse(sentiments_count$author == "HPL", sentiments_count$n/frequency$HPL, sentiments_count$n/frequency$MWS))
+
+
+ggplot(sentiments_count) + 
+  geom_col(aes(sentiment, proportion, fill = sentiment)) + 
+  facet_wrap(~ author) +
+  coord_flip() +
+  theme(legend.position = "none")
+```
+
+Observations:
+
+1. EAP does not use many words with fear and disgust, compared to the other authors. 
+2. EAP has the highest proportion of trust
+3. HPL is the only author with more negative words than positive words.
+4. HPL has the smallest proportion of joy and surprise.
+5. MWS has the highest proportion of positive words, as well as negative words and anticipation. 
+6. MWS has the highest proportion of words associated with sentiment. 
+
+## 7.2 Fear Analysis
+
+Since we are analyzing horror movies, I thought that looking at the fear sentiment might yield some interest results.
+
+```{r}
+nrc_fear <- filter(get_sentiments('nrc'), sentiment == "fear")
+
+fear <- inner_join(spooky_wrd, nrc_fear, by = "word")
+
+#Counts the number of fear words for each author, as well as the total among all three
+fear_words     <- count(group_by(fear, word, author))
+fear_words_all <- rename(count(group_by(fear, word)), all = n)
+
+fear_words <- left_join(fear_words, fear_words_all, by = "word")
+fear_words <- arrange(fear_words, desc(all))
+fear_words <- ungroup(head(fear_words, 60))
+
+# Counts the proportion of the word in the total number of words featured by each author
+fear_words$proportion <- ifelse(fear_words$author == "EAP", fear_words$n/frequency$EAP, ifelse(fear_words$author == "HPL", fear_words$n/frequency$HPL, fear_words$n/frequency$MWS))
+
+ggplot(fear_words) +
+  geom_col(aes(reorder(word, all, FUN = min), proportion, fill = author)) +
+  xlab(NULL) +
+  coord_flip() +
+  facet_wrap(~ author) +
+  theme(legend.position = "none")
+```
+
+Observations:
+
+1. 'Death' is the most frequent fear word, and MWS has the largest proportion of that word used among all words in MWS text.
+2. EAP has the smallest proportion of the word 'fear'. EAP has the largest proportion of 'doubt'
+3. 'Terrible' is a popular word for HPL texts, and less for the other two authors.
+4. 'Misery' is a word that is used often by MWS, used drastically less by EAP, and not used at all by HPL. 
+5. 'Horror' is a relatively common word among all three authors. 
