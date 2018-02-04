@@ -3,8 +3,8 @@ title: "The Similarities and Differences among Spooky Authors"
 author: "Pak Kin (Chris) Lai"
 date: "February 4, 2018"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 # 1 Introduction
@@ -203,6 +203,8 @@ Observations:
 5. 'Head' is used frequently by EAP.
 
 ## 6.1.ii Word Clouds
+
+Word Clouds may also give us an interesting illustration. 
 
 ```{r}
 #Count each word grouped by author
@@ -560,7 +562,7 @@ Observations:
 
 ## 8.2 Fear Dataset
 
-Since we are analyzing horror movies, I thought that looking at the fear sentiment might yield some interest results.
+Since we are analyzing horror texts, I thought that looking at the fear sentiment might yield some interest results.
 
 ```{r}
 nrc_fear <- filter(get_sentiments('nrc'), sentiment == "fear")
