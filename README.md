@@ -25,4 +25,4 @@ proj/
 
 Please see each subfolder for a README file.
 
-
+![alt text](figs/Overall_structure.png)
