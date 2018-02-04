@@ -42,7 +42,7 @@ library(tidyr)
 library(widyr)
 ```
 
-##2.2 Helper Function
+## 2.2 Helper Function
 
 The only helper function that we use is the multiplot function. 
 
@@ -79,7 +79,7 @@ We also see that there are no missing values.
 sum(is.na(spooky))
 ```
 
-##3.3 Reformatting Author
+## 3.3 Reformatting Author
 
 Changing the author name to be a factor variable will help us later on.
 
