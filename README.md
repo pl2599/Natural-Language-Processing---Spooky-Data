@@ -25,10 +25,10 @@ proj/
 
 Please see each subfolder for a README file.
 
-# 5 Sentence and Structure Analyses
+# Sentence and Structure Analyses
 This section allows us to look at the general structure of the sentences for each author. 
 
-## 5.1 Total Featured, Sentence Length, Word Length
+## Total Featured, Sentence Length, Word Length
 ![alt text](figs/Overall_structure.png)
 
 Observations:
@@ -37,15 +37,15 @@ Observations:
 2. Sentence length varies more for EAP.
 3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
-# 6 Characteristic Word Analyses
+# Characteristic Word Analyses
 
 This section is to study the most frequently used characteristic word for each author. 
 
-## 6.1 Original Dataset
+## Original Dataset
 
 This is the analyis done on our original dataset with the lower case and without punctuation.
 
-### 6.1.i Proportion of Words
+### Proportion of Words
 
 We first look at the highest proportion of the characteristic words used by each author.
 ![alt text](figs/Original_proportion.png)
@@ -58,7 +58,7 @@ Observations:
 4. 'Heard', 'house', annd 'door' are used more frequently by HPL.
 5. 'Head' is used frequently by EAP.
 
-## 6.1.ii Word Clouds
+## Word Clouds
 
 Word Clouds may also give us an interesting illustration. 
 
@@ -77,7 +77,7 @@ Observations:
 2. EAP prefers the word 'Day', whereas HPL prefers the word 'Night'.
 3. 'Love', 'Heart', 'Life' are common words for MWS.
 
-### 6.1.i Tf-idf
+### Tf-idf
   
 A Tf-idf analysis will give us a measure of the frequency of a word used by one author relative to the frequency of that word used by the others. In other words, it adjusts for the rarity of the word. 
 ![alt text](figs/Original_tf_idf.png)
@@ -89,11 +89,11 @@ Observations:
 3. HPL's 'folk', 'bearded', 'reef', 'brown', and 'attic' are interesting words with high tf-idf.
 4. MWS's 'misery', 'feelings', labours', and 'protector' are words with high tf-idf. They are words most associated with emotions and protections. MWS also has the most amount of words in the top 30 tf-idfs. 
 
-### 6.2 Stop Words Dataset
+### Stop Words Dataset
 
 This is the analysis done on the stop dataset that we created earlier.
 
-### 6.2.i Proportion of Words
+### Proportion of Words
 
 Using the dataset that includes the stop words, we can simply look at the most commonly used word grouped by each author since stop words are typically the most commonly used words. However, we look at the proportion instead of the total number of appearances since our earlier observation shows that authors are featured differently in this data. 
 ![alt text](figs/Stop_proportion.png)
@@ -106,11 +106,11 @@ Observations:
 4. MWP uses the words "I", 'my', 'his' more frequently than the other two authors, but only by a small margin. 
 5. HPL uses 'my' less frequently than the other two authors, but only by a small margin.
 
-## 6.3 Stem Words Dataset
+## Stem Words Dataset
 
 It might be interesting to see the words grouped by their stem instead. To do this, I duplicated the dataset and did the same analyses as above. 
 
-### 6.3.i Proportion of Words
+### Proportion of Words
 ![alt text](figs/Stem_proportion.png)
 
 Observations:
@@ -121,9 +121,9 @@ Observations:
 4. 'Night' and 'hous' is used much more frequently by HPL.
 5. 'Fear' is used less frequently compared to the other authors.
 
-## 6.4 Accented Words Dataset
+## Accented Words Dataset
 
-### 6.4.i Proportion of Words
+### Proportion of Words
 
 Another interesting analysis to make is to look at the frequency/proportion of accented words for each author. 
 ![alt text](figs/Accented_proportion.png)
@@ -134,7 +134,7 @@ Observations:
 2. EAP uses the word 'rogêt' a lot. 
 3. HPL uses the word 'celephaïs a lot. 
 
-### 6.4.ii Proportion of All Words
+### Proportion of All Words
 
 However, there isn't many overlap of the specific accented words used between the two authors. As a result, it may be more useful to just simply see the proportion of all accented words used by each author.
 ![alt text](figs/Accented_proportion_all.png)
@@ -144,15 +144,15 @@ Observations:
 1. As we can see, EAP has more than double the proportion of accented words compared to that of HPL. 
 2. MWS doesn't use accented words at all.
 
-# 7 Pair Analyses
+# Pair Analyses
 
 Now we might want to move on from looking at single words to two words.
 
-## 7.1 Bigram Dataset
+## Bigram Dataset
 
 Bigram analysis allows us to observe two consecutive words.
 
-### 7.1.i Frequency of Bigrams
+### Frequency of Bigrams
 
 We create another dataset using the `unnest_tokens()` function but this time to include two words at a time. 
 
@@ -164,7 +164,7 @@ Observations:
 1. MWS' 'Lord Raymond' is the most commonly used bigram among all three authors. 'Ha ha' is used most commonly by EAP. 'Heh heh' is used most frequently by HPL.
 2. Among the top 30 bigrams, EAP holds the majority of them, whereas MWS holds the least.
 
-### 7.1.ii Tf_idf 
+### Tf_idf 
 
 Just for fault-proof, a Tf_idf analysis is also done to look at the top 30 rarest bigrams among the three authors.
 ![alt text](figs/Bigram_tf_idf.png)
@@ -175,11 +175,11 @@ Observations:
 2. HPL's 'Shunned house', 'tempest mountain', and 'yog sothoth' are also some unique combinations. 
 3. MWS's 'fellow creatures', 'native country', and 'natural philosophy' are quite frequent occurences.
 
-## 7.2 Word Pairs Dataset
+## Word Pairs Dataset
 
 Now we want to analyze any pair of words that might show up in each text. This is separate from our bigram analysis because the pairs are irrespective of their adjacency, as long as they exist in the same text/passage.
 
-## 7.2.i Frequency of Word Pairs
+## Frequency of Word Pairs
 ![alt text](figs/Pairs_frequency.png)
 
 Observations:
@@ -189,11 +189,11 @@ Observations:
 3. MWS' most common pair is 'eyes tear'. A lot of her pairs include words such as 'love' and 'eyes'. 
 4. All three authors have 'day night' in their top pairs. EAP and HPL as their 2nd highest, and MWS as ranked 6th. However it is important to note that the frequency of MWS' pairs are higher than the other two authors. Therefore, she actually uses 'day night' the most. 
 
-# 8 Sentiment Analysis
+# Sentiment Analysis
 
 Last but not least, we may want to look at some sentiment analysis to see what kind of emotions are the authors trying to evoke out of the readers.
 
-## 8.1 Sentiment Words across Authors
+## Sentiment Words across Authors
 ![alt text](figs/Sentiment.png)
 
 Observations:
@@ -205,7 +205,7 @@ Observations:
 5. MWS has the highest proportion of positive words, as well as negative words and anticipation. 
 6. MWS has the highest proportion of words associated with sentiment. 
 
-## 8.2 Fear Dataset
+## Fear Dataset
 
 Since we are analyzing horror texts, I thought that looking at the fear sentiment might yield some interest results.
 ![alt text](figs/Fear.png)
