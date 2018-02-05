@@ -231,3 +231,8 @@ Observations:
 5. 'Horror' is a relatively common word among all three authors. 
 
 Of course, we see some common words that invoke the fear sentiment. However, certain ones belong mostly to each author.
+
+# References
+
+[Treemap House of Horror: Spooky EDA/LDA/Features](https://www.kaggle.com/headsortails/treemap-house-of-horror-spooky-eda-lda-features)
+[Text Mining with R - A Tidy Approach](https://www.tidytextmining.com/ngrams.html)
