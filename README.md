@@ -26,7 +26,7 @@ proj/
 Please see each subfolder for a README file.
 
 # Sentence and Structure Analyses
-This section allows us to look at the general structure of the sentences for each author. 
+Before looking at specific words, let us first step back and look at the differences in the general structure of the texts among the authors.
 
 ## Total Featured, Sentence Length, Word Length
 ![alt text](figs/Overall_structure.png)
@@ -37,9 +37,11 @@ Observations:
 2. Sentence length varies more for EAP.
 3. EAP has slightly longer words than the others, whereas MWS has slightly shorter words than the others. 
 
+We are already beginning to see the styles of the authors based on their tendency to use shorter/longer sentences as well as shorter/longer words.
+
 # Characteristic Word Analyses
 
-This section is to study the most frequently used characteristic word for each author. 
+Now, we are ready to dig a little deeper. Let us look at the most frequently used characteristic words for each author. 
 
 ## Original Dataset
 
@@ -60,7 +62,7 @@ Observations:
 
 ## Word Clouds
 
-Word Clouds may also give us an interesting illustration. 
+Word Clouds may also give us an interesting illustration and give us more ideas to differentiate among the authors' texts.
 
 EAP
 ![alt text](figs/EAP_Original_Wordcloud.png)
@@ -79,7 +81,7 @@ Observations:
 
 ### Tf-idf
   
-A Tf-idf analysis will give us a measure of the frequency of a word used by one author relative to the frequency of that word used by the others. In other words, it adjusts for the rarity of the word. 
+Perhaps, even that is not enough. What about a Tf-idf analysis? A Tf-idf analysis will give us a measure of the frequency of a word used by one author relative to the frequency of that word used by the others. In other words, it adjusts for the rarity of the word. 
 ![alt text](figs/Original_tf_idf.png)
 
 Observations:
@@ -89,9 +91,11 @@ Observations:
 3. HPL's 'folk', 'bearded', 'reef', 'brown', and 'attic' are interesting words with high tf-idf.
 4. MWS's 'misery', 'feelings', labours', and 'protector' are words with high tf-idf. They are words most associated with emotions and protections. MWS also has the most amount of words in the top 30 tf-idfs. 
 
+As we can see, there are certain characteristic words that belong to each author. 
+
 ### Stop Words Dataset
 
-This is the analysis done on the stop dataset that we created earlier.
+For the original dataset, we filtered out stop words. However, I think it may be useful to look at the commonly used stop words that each author use. This is the analysis done on the stop dataset that we created earlier.
 
 ### Proportion of Words
 
@@ -106,9 +110,11 @@ Observations:
 4. MWP uses the words "I", 'my', 'his' more frequently than the other two authors, but only by a small margin. 
 5. HPL uses 'my' less frequently than the other two authors, but only by a small margin.
 
+There are certain stop words that are used by each author more frequently than others.
+
 ## Stem Words Dataset
 
-It might be interesting to see the words grouped by their stem instead. To do this, I duplicated the dataset and did the same analyses as above. 
+Now, it might be interesting to see the words grouped by their stem instead. For instance, the stem of lovely is love. This will help us categorize similar words together.
 
 ### Proportion of Words
 ![alt text](figs/Stem_proportion.png)
@@ -121,11 +127,13 @@ Observations:
 4. 'Night' and 'hous' is used much more frequently by HPL.
 5. 'Fear' is used less frequently compared to the other authors.
 
+These observations are mostly consistent with our original dataset. 
+
 ## Accented Words Dataset
 
 ### Proportion of Words
 
-Another interesting analysis to make is to look at the frequency/proportion of accented words for each author. 
+Here's another idea. What about looking at accented words? I noticed that there are certain words that are accented. Do all authors use accented words, and are there commmon ones? Let us look at the frequency/proportion of accented words for each author. 
 ![alt text](figs/Accented_proportion.png)
 
 Observations:
@@ -144,13 +152,15 @@ Observations:
 1. As we can see, EAP has more than double the proportion of accented words compared to that of HPL. 
 2. MWS doesn't use accented words at all.
 
+Accented words are mostly used solely by a single author. This tells us that if we identify a certain accented word, it may be a characteristic/style of that author.
+
 # Pair Analyses
 
-Now we might want to move on from looking at single words to two words.
+So, we are done looking at single words. What about two words?
 
 ## Bigram Dataset
 
-Bigram analysis allows us to observe two consecutive words.
+First, let us look at bigrams. Bigram analysis allows us to observe two consecutive words, and see if some are unique to some authors.
 
 ### Frequency of Bigrams
 
@@ -175,9 +185,11 @@ Observations:
 2. HPL's 'Shunned house', 'tempest mountain', and 'yog sothoth' are also some unique combinations. 
 3. MWS's 'fellow creatures', 'native country', and 'natural philosophy' are quite frequent occurences.
 
+There are several bigrams that are quite unique to each author. 
+
 ## Word Pairs Dataset
 
-Now we want to analyze any pair of words that might show up in each text. This is separate from our bigram analysis because the pairs are irrespective of their adjacency, as long as they exist in the same text/passage.
+What if we want to look at pairs but not necessarily pairs that are consecutive? In other words, we may want to analyze any pair of words that might show up in each text. This is separate from our bigram analysis because the pairs are irrespective of their adjacency, as long as they exist in the same text/passage.
 
 ## Frequency of Word Pairs
 ![alt text](figs/Pairs_frequency.png)
@@ -191,7 +203,7 @@ Observations:
 
 # Sentiment Analysis
 
-Last but not least, we may want to look at some sentiment analysis to see what kind of emotions are the authors trying to evoke out of the readers.
+Last but not least, we want to look at some sentiment analysis to see what kind of emotions are the authors trying to evoke out of the readers.
 
 ## Sentiment Words across Authors
 ![alt text](figs/Sentiment.png)
@@ -207,7 +219,7 @@ Observations:
 
 ## Fear Dataset
 
-Since we are analyzing horror texts, I thought that looking at the fear sentiment might yield some interest results.
+Since we are analyzing horror texts, I thought that looking at the fear sentiment would yield the most interesting results.
 ![alt text](figs/Fear.png)
 
 Observations:
@@ -217,3 +229,5 @@ Observations:
 3. 'Terrible' is a popular word for HPL texts, and less for the other two authors.
 4. 'Misery' is a word that is used often by MWS, used drastically less by EAP, and not used at all by HPL. 
 5. 'Horror' is a relatively common word among all three authors. 
+
+Of course, we see some common words that invoke the fear sentiment. However, certain ones belong mostly to each author.
