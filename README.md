@@ -19,7 +19,7 @@ proj/
 Please see each subfolder for a README file.
 
 # Sentence and Structure Analyses
-Before looking at specific words, let us first step back and look at the differences in the general structure of the texts among the authors.
+Before diving right in, let us take a big step backwards and look at the differences in the general structure of the texts among the authors.
 
 ## Total Featured, Sentence Length, Word Length
 ![alt text](figs/Overall_structure.png)
